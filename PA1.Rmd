@@ -1,0 +1,75 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+## Load and preprocess the data
+Read the data file and print the first few lines for inspection. 
+```{r}
+data <- read.csv("activity.csv")
+head(data)
+```
+
+There are missing values, so index the vector accordingly. 
+```{r}
+bad <- is.nan(data$steps)
+```
+
+Combine the date and interval variables into an R time object. Since strptime() cannot handle the hhmm format we will need to
+
+1. Add leading zeros to the interval variable, 
+1. Split it up into two segments with substr(), 
+1. Feed into strptime() as %h%m, and 
+1. Print the top of the array for inspection. 
+
+```{r}
+# Four element time format array: 
+time <- sprintf('%04i', data$interval)
+datetime <- strptime(paste(data$date, substr(time,1,2), 
+            substr(time,3,4)), '%Y-%m-%d %H %M', 
+            tz="EST5EDT")
+head(datetime)
+```
+
+How many days do our data cover? 
+```{r}
+> difftime(tail(datetime, n=1), datetime[1])
+```
+
+## What is mean total number of steps taken per day?
+
+Sum steps per day and produce a vector containing those values. 
+
+
+
+```{r}
+datetime[1]; tail(datetime, n=1)
+```
+
+This means we can add up steps in bunches of 24 (hours in a day) times 12 (entries per hour, given the five-minute interval), that is, 288 time steps for each day. 
+
+```{r}
+ndays <- length(datetime)/(24*12)
+ndays
+```
+
+**The integer daily average number of steps is:**
+
+```{r}
+round(sum(data$steps, na.rm=TRUE)/ndays)
+```
+
+Now let's make a histogram. 
+
+## What is the average daily activity pattern?
+
+Produce a plot of steps per hour
+
+
+## Inputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
