@@ -28,16 +28,16 @@ Combine the date and interval variables into an R time object. Since strptime() 
 
 1. Add leading zeros to the interval variable, 
 1. Split it up into two segments with substr(), 
-1. Feed into strptime() as %h%m, and 
+1. Feed into strptime() as %h%m (but format as POSIXlt), and 
 1. Print the top of the array for inspection. 
 
 
 ```r
 # Four element time format array: 
 time <- sprintf('%04i', data$interval)
-datetime <- strptime(paste(data$date, substr(time,1,2), 
-            substr(time,3,4)), '%Y-%m-%d %H %M', 
-            tz="EST5EDT")
+datetime <- as.POSIXlt(strptime(paste(data$date, 
+            substr(time,1,2), substr(time,3,4)), 
+            '%Y-%m-%d %H %M', tz="EST5EDT"))
 head(datetime)
 ```
 
@@ -47,48 +47,80 @@ head(datetime)
 ## [5] "2012-10-01 00:20:00 EDT" "2012-10-01 00:25:00 EDT"
 ```
 
+How many days do our data cover? 
+
+```r
+difftime(tail(datetime, n=1), datetime[1])
+```
+
+```
+## Time difference of 61.03819 days
+```
+
 ## What is mean total number of steps taken per day?
 
-Count the number of days in the dataset. Inspect the first and last entry in the dataset to confirm that an integer number of days are recorded. 
+First we need to index the array per day. 
 
 
 ```r
-datetime[1]; tail(datetime, n=1)
+dayIndex <- seq(datetime[1], to=tail(datetime, n=1), by='day')
+head(dayIndex)
 ```
 
 ```
-## [1] "2012-10-01 EDT"
+## [1] "2012-10-01 EDT" "2012-10-02 EDT" "2012-10-03 EDT" "2012-10-04 EDT"
+## [5] "2012-10-05 EDT" "2012-10-06 EDT"
 ```
 
-```
-## [1] "2012-11-30 23:55:00 EST"
-```
-
-And count days as the number of entries divided by 24 (hours in a day) times 12 (entries per hour, given the five-minute interval). 
+And now count up the steps by day. A for loop is the quickest way I can think of but there is probably a smarter way. First start a vector
 
 
 ```r
-ndays <- length(datetime)/(24*12)
-ndays
+daySteps <- numeric(length(dayIndex))
+
+for(i in 2:length(dayIndex)) {
+    thisDay <- (datetime > dayIndex[i-1] & datetime < dayIndex[i])
+    daySteps[i] = sum(data$steps[thisDay], na.rm=TRUE)
+}
+print(daySteps)
 ```
 
 ```
-## [1] 61
+##  [1]     0     0   126 11352 12069 13294 15420 11015     0 12811  9866
+## [12] 10304 17382 12426 15098 10139 15084 13452 10056 11829 10395  8821
+## [23] 13450  8918  8355  2492  6778 10119 11458  5018  9819 15414     0
+## [34] 10600 10571     0 10439  8109 13076  3251     0     0 12608 10765
+## [45]  7336     0    41  5441 14339 15075  8841  4372 12787 20427 21194
+## [56] 14478 11521 11475 13646 10183  7047     0
 ```
 
-**The integer daily average number of steps is:**
+**The daily integer mean and median numbers of steps are:**
 
 
 ```r
-round(sum(data$steps, na.rm=TRUE)/ndays)
+round(mean(daySteps)); round(median(daySteps))
 ```
 
 ```
-## [1] 9354
+## [1] 9200
 ```
+
+```
+## [1] 10350
+```
+
+Now let's make a histogram with enough breaks to show the NA bar. 
+
+
+```r
+hist(daySteps, breaks=18)
+```
+
+![](PA1_files/figure-html/unnamed-chunk-8-1.png) 
 
 ## What is the average daily activity pattern?
 
+Produce a plot of steps per hour
 
 
 ## Inputing missing values
@@ -96,3 +128,10 @@ round(sum(data$steps, na.rm=TRUE)/ndays)
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+Produce an index of weekends
+
+```r
+wkend <- (weekdays(datetime) == "Sunday" | 
+            weekdays(datetime) == "Saturday")
+```
