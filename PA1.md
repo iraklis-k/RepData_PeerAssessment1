@@ -72,7 +72,7 @@ head(dayIndex)
 ## [5] "2012-10-05 EDT" "2012-10-06 EDT"
 ```
 
-And now count up the steps by day. A for loop is the quickest way I can think of but there is probably a smarter way. First start a vector
+And now count up the steps by day. A for loop is the quickest way I can think of but there is probably a smarter way. Start a zero vector first. 
 
 
 ```r
@@ -120,7 +120,38 @@ hist(daySteps, breaks=18)
 
 ## What is the average daily activity pattern?
 
-Produce a plot of steps per hour
+First order() to sort by time-step (0000, 0005, etc) and then bundle by reshaping the array through dim(). The dataset covers 61 days and each day has 288 timesteps. 
+
+
+```r
+#byInterval <- data$steps[order(data$interval)]
+
+nTimeSteps <- length(unique(data$interval))
+avgByInterval <- numeric(length=nTimeSteps)
+
+for(i in 1:nTimeSteps){
+    avgByInterval[i] <- mean(subset(data, 
+            interval==unique(interval)[i])[[1]], na.rm=TRUE)
+}
+head(avgByInterval)
+```
+
+```
+## [1] 1.7169811 0.3396226 0.1320755 0.1509434 0.0754717 2.0943396
+```
+
+That is, break down by day (Mon, Tue...) and produce seven plots. 
+
+```r
+#mon <- weekdays(datetime) == "Monday"
+#tue <- weekdays(datetime) == "Tuesday"
+#wed <- weekdays(datetime) == "Wednesday"
+#thu <- weekdays(datetime) == "Thursday"
+#fri <- weekdays(datetime) == "Friday"
+#sat <- weekdays(datetime) == "Saturday"
+#sun <- weekdays(datetime) == "Sunday"
+#plot(data$interval[mon] ~ data$steps[mon])
+```
 
 
 ## Inputing missing values
@@ -129,7 +160,7 @@ Produce a plot of steps per hour
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-Produce an index of weekends
+Produce an index of weekends instead of two separate factors. 
 
 ```r
 wkend <- (weekdays(datetime) == "Sunday" | 

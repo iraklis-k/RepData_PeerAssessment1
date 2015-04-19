@@ -105,7 +105,7 @@ head(datetime)</code></pre>
 head(dayIndex)</code></pre>
 <pre><code>## [1] &quot;2012-10-01 EDT&quot; &quot;2012-10-02 EDT&quot; &quot;2012-10-03 EDT&quot; &quot;2012-10-04 EDT&quot;
 ## [5] &quot;2012-10-05 EDT&quot; &quot;2012-10-06 EDT&quot;</code></pre>
-<p>And now count up the steps by day. A for loop is the quickest way I can think of but there is probably a smarter way. First start a vector</p>
+<p>And now count up the steps by day. A for loop is the quickest way I can think of but there is probably a smarter way. Start a zero vector first.</p>
 <pre class="r"><code>daySteps &lt;- numeric(length(dayIndex))
 
 for(i in 2:length(dayIndex)) {
@@ -129,14 +129,34 @@ print(daySteps)</code></pre>
 </div>
 <div id="what-is-the-average-daily-activity-pattern" class="section level2">
 <h2>What is the average daily activity pattern?</h2>
-<p>Produce a plot of steps per hour</p>
+<p>First order() to sort by time-step (0000, 0005, etc) and then bundle by reshaping the array through dim(). The dataset covers 61 days and each day has 288 timesteps.</p>
+<pre class="r"><code>#byInterval &lt;- data$steps[order(data$interval)]
+
+nTimeSteps &lt;- length(unique(data$interval))
+avgByInterval &lt;- numeric(length=nTimeSteps)
+
+for(i in 1:nTimeSteps){
+    avgByInterval[i] &lt;- mean(subset(data, 
+            interval==unique(interval)[i])[[1]], na.rm=TRUE)
+}
+head(avgByInterval)</code></pre>
+<pre><code>## [1] 1.7169811 0.3396226 0.1320755 0.1509434 0.0754717 2.0943396</code></pre>
+<p>That is, break down by day (Mon, Tue…) and produce seven plots.</p>
+<pre class="r"><code>#mon &lt;- weekdays(datetime) == &quot;Monday&quot;
+#tue &lt;- weekdays(datetime) == &quot;Tuesday&quot;
+#wed &lt;- weekdays(datetime) == &quot;Wednesday&quot;
+#thu &lt;- weekdays(datetime) == &quot;Thursday&quot;
+#fri &lt;- weekdays(datetime) == &quot;Friday&quot;
+#sat &lt;- weekdays(datetime) == &quot;Saturday&quot;
+#sun &lt;- weekdays(datetime) == &quot;Sunday&quot;
+#plot(data$interval[mon] ~ data$steps[mon])</code></pre>
 </div>
 <div id="inputing-missing-values" class="section level2">
 <h2>Inputing missing values</h2>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
-<p>Produce an index of weekends</p>
+<p>Produce an index of weekends instead of two separate factors.</p>
 <pre class="r"><code>wkend &lt;- (weekdays(datetime) == &quot;Sunday&quot; | 
             weekdays(datetime) == &quot;Saturday&quot;)</code></pre>
 </div>

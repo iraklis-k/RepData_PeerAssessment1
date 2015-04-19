@@ -47,7 +47,7 @@ dayIndex <- seq(datetime[1], to=tail(datetime, n=1), by='day')
 head(dayIndex)
 ```
 
-And now count up the steps by day. A for loop is the quickest way I can think of but there is probably a smarter way. First start a vector
+And now count up the steps by day. A for loop is the quickest way I can think of but there is probably a smarter way. Start a zero vector first. 
 
 ```{r}
 daySteps <- numeric(length(dayIndex))
@@ -73,7 +73,39 @@ hist(daySteps, breaks=18)
 
 ## What is the average daily activity pattern?
 
-Produce a plot of steps per hour
+First subset() to sort by time-step (0000, 0005, etc) and get the average according to the interval. 
+
+```{r}
+#byInterval <- data$steps[order(data$interval)]
+
+nTimeSteps <- length(unique(data$interval))
+avgByInterval <- numeric(length=nTimeSteps)
+
+for(i in 1:nTimeSteps){
+    avgByInterval[i] <- mean(subset(data, 
+            interval==unique(interval)[i])[[1]], na.rm=TRUE)
+}
+
+```
+
+Now plot the average daily activity pattern: 
+
+```{r}
+plot(avgByInterval ~ unique(interval), data=data, type='l', 
+    xlab='Time of day', ylab='Average steps')
+```
+
+That is, break down by day (Mon, Tue...) and produce seven plots. 
+```{r}
+#mon <- weekdays(datetime) == "Monday"
+#tue <- weekdays(datetime) == "Tuesday"
+#wed <- weekdays(datetime) == "Wednesday"
+#thu <- weekdays(datetime) == "Thursday"
+#fri <- weekdays(datetime) == "Friday"
+#sat <- weekdays(datetime) == "Saturday"
+#sun <- weekdays(datetime) == "Sunday"
+#plot(data$interval[mon] ~ data$steps[mon])
+```
 
 
 ## Inputing missing values
